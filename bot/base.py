@@ -152,7 +152,7 @@ async def callback_simple(
 
     match query.data:
         case "checklist":
-            with open("media/photos/3.jpg", "rb") as file:
+            with open("media/photos/3.png", "rb") as file:
                 await update.effective_chat.send_photo(
                     caption="До начала конференции остаются считанные дни. Смотри чек-лист и проверь, готов ли ты действовать на опережение!\n"
                     "Рекомендуем взять с собой:\n"
