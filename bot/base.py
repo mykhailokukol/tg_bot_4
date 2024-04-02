@@ -54,7 +54,11 @@ async def start(
                 text = "Рады приветствовать тебя в @TELE2_RLT_BOT\nСовсем скоро тут появится подробное расписание, информация о трансферах, проживании и многое другое.\nСейчас ты можешь посмотреть чек-лист, он поможет тебе ничего не забыть.\nЕсли у тебя остались вопросы, обратись к организаторам.\n\nА пока настройся на мероприятие вместе с героями Tele2!"
                 markup = InlineKeyboardMarkup(start_keyboard_pre_release)
                 await update.effective_chat.send_video(
-                    caption=text, video=file, reply_markup=markup
+                    caption=text,
+                    video=file,
+                    reply_markup=markup,
+                    width=1920,
+                    height=1080,
                 )
         except Exception as e:
             log.error(e)
@@ -210,12 +214,14 @@ async def callback_simple(
             await start(update, context)
         case "contacts":
             await update.effective_chat.send_message(
-                "Трансфер: Оля Яршина +7 977 522 6352\n"
-                "Экскурсии: Лена Богорад +7 911 952 4734\n"
+                "Трансфер: Ольга Яршина +7 977 522 6352\n"
+                "Экскурсии: Елена Богорад +7 911 952 4734\n"
                 "Tele2: Екатерина Яркина +7 962 992 8409",
                 reply_markup=ReplyKeyboardRemove(),
             )
-            await start(update, context)
+
+            if settings.STATEMENT == "release":
+                await start(update, context)
             return ConversationHandler.END
 
 
