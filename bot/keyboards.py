@@ -35,7 +35,10 @@ start_keyboard_without_tours = start_keyboard[:-4] + start_keyboard[-2:]
 start_keyboard_pre_release = [
     [
         InlineKeyboardButton("Чек-лист", callback_data="checklist"),
-    ]
+    ],
+    [
+        InlineKeyboardButton("Контакты организаторов", callback_data="contacts"),
+    ],
 ]
 
 

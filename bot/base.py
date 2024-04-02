@@ -211,7 +211,8 @@ async def callback_simple(
         case "contacts":
             await update.effective_chat.send_message(
                 "Трансфер: Оля Яршина +7 977 522 6352\n"
-                "Экскурсии: Лена Богорад +7 911 952 4734",
+                "Экскурсии: Лена Богорад +7 911 952 4734\n"
+                "Tele2: Екатерина Яркина +7 962 992 8409",
                 reply_markup=ReplyKeyboardRemove(),
             )
             await start(update, context)
