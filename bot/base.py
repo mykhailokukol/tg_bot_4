@@ -493,7 +493,8 @@ async def residence(
 
     await update.message.reply_text(text=info)
 
-    await start(update, context)
+    if settings.STATEMENT == "release":
+        await start(update, context)
     return ConversationHandler.END
 
 

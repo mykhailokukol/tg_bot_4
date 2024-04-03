@@ -37,6 +37,9 @@ start_keyboard_pre_release = [
         InlineKeyboardButton("Чек-лист", callback_data="checklist"),
     ],
     [
+        InlineKeyboardButton("Проживание", callback_data="residence"),
+    ],
+    [
         InlineKeyboardButton("Контакты организаторов", callback_data="contacts"),
     ],
 ]
