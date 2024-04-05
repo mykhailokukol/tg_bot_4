@@ -22,7 +22,7 @@ from bot.base import (
     tour_choose,
     tour_description,
     tour_name,
-    tour_passport,
+    # tour_passport,
     tour_phone,
     tour_finish,
     residence,
@@ -75,9 +75,9 @@ def main() -> None:
             ],
             TOUR_NAME: [MessageHandler(filters.TEXT & ~filters.COMMAND, tour_name)],
             TOUR_PHONE: [MessageHandler(filters.TEXT & ~filters.COMMAND, tour_phone)],
-            TOUR_PASSPORT: [
-                MessageHandler(filters.TEXT & ~filters.COMMAND, tour_passport)
-            ],
+            # TOUR_PASSPORT: [
+            #     MessageHandler(filters.TEXT & ~filters.COMMAND, tour_passport)
+            # ],
             TOUR_FINISH: [MessageHandler(filters.TEXT & ~filters.COMMAND, tour_finish)],
         },
         fallbacks=[CommandHandler("cancel", cancel)],

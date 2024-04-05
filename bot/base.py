@@ -81,7 +81,8 @@ async def start(
 
         add_user_to_db(db, update.message.from_user.id)
 
-        if already_signed_up_for_tour(update.effective_chat.id, db):
+        already = already_signed_up_for_tour(update.effective_chat.id, db)
+        if already:
             markup = InlineKeyboardMarkup(start_keyboard_without_tours)
         else:
             markup = InlineKeyboardMarkup(start_keyboard)
@@ -112,9 +113,10 @@ async def callback(
 
     match query.data:
         case "tour":
-            if already_signed_up_for_tour(update.effective_chat.id, db):
+            already = already_signed_up_for_tour(update.effective_chat.id, db)
+            if already:
                 await update.effective_chat.send_message(
-                    "Вы уже записались на экскурсию"
+                    f"Вы уже записались на экскурсию {already}"
                 )
                 return await start(update, context)
 
@@ -309,8 +311,8 @@ async def tour_description(
         return TOUR_CHOOSE
 
     context.user_data["tour_name"] = tour["name"]
-    if tour["name"].startswith("Прогулки в Зените"):
-        context.user_data["tour_zenith"] = True
+    # if tour["name"].startswith("Прогулки в Зените"):
+    #     context.user_data["tour_zenith"] = True
 
     markup = ReplyKeyboardMarkup(
         [
@@ -374,37 +376,37 @@ async def tour_phone(
     return TOUR_FINISH
 
 
-async def tour_passport(
-    update: Update,
-    context: ContextTypes.DEFAULT_TYPE,
-) -> int:
-    # Check for free places at chosen tour
-    tour = free_places_validation(db, context.user_data["tour_name"])
-    if not tour:
-        await update.message.reply_text(
-            "Набор на данную экскурсию завершен, пожалуйста, выберите другую"
-        )
-        return TOUR_CHOOSE
+# async def tour_passport(
+#     update: Update,
+#     context: ContextTypes.DEFAULT_TYPE,
+# ) -> int:
+#     # Check for free places at chosen tour
+#     tour = free_places_validation(db, context.user_data["tour_name"])
+#     if not tour:
+#         await update.message.reply_text(
+#             "Набор на данную экскурсию завершен, пожалуйста, выберите другую"
+#         )
+#         return TOUR_CHOOSE
 
-    context.user_data["tour_user_passport"] = update.message.text
+#     context.user_data["tour_user_passport"] = update.message.text
 
-    context.user_data["user_id"] = update.message.from_user.id
+#     context.user_data["user_id"] = update.message.from_user.id
 
-    decrement_free_places(context.user_data["tour_name"], db)
-    add_tour_participant(db, context.user_data)
+#     decrement_free_places(context.user_data["tour_name"], db)
+#     add_tour_participant(db, context.user_data)
 
-    await update.message.reply_text(
-        "Ваша заявка принята.\n"
-        "<b>Актуальную</b> информацию по месту и времени экскурсии Вы сможете найти в разделе «Тайминг 11.04»\n"
-        "Информацию по трансферу до места встречи Вы сможете найти в разделе «Трансфер 11.04».\n"
-        "Обязательно ознакомьтесь с перечнем необходимых вещей для экскурсии в разделе «чек-лист».\n"
-        "Для дополнительного подтверждения с Вами может связаться ответственный по телефону.\n",
-        parse_mode=ParseMode.HTML,
-        reply_markup=ReplyKeyboardRemove(),
-    )
-    await start(update, context)
+#     await update.message.reply_text(
+#         "Ваша заявка принята.\n"
+#         "<b>Актуальную</b> информацию по месту и времени экскурсии Вы сможете найти в разделе «Тайминг 11.04»\n"
+#         "Информацию по трансферу до места встречи Вы сможете найти в разделе «Трансфер 11.04».\n"
+#         "Обязательно ознакомьтесь с перечнем необходимых вещей для экскурсии в разделе «чек-лист».\n"
+#         "Для дополнительного подтверждения с Вами может связаться ответственный по телефону.\n",
+#         parse_mode=ParseMode.HTML,
+#         reply_markup=ReplyKeyboardRemove(),
+#     )
+#     await start(update, context)
 
-    return ConversationHandler.END
+#     return ConversationHandler.END
 
 
 async def tour_finish(
@@ -412,18 +414,19 @@ async def tour_finish(
     context: ContextTypes.DEFAULT_TYPE,
 ) -> int:
 
-    if (
-        "tour_zenith" in context.user_data
-        and not "tour_user_phone" in context.user_data
-    ):
-        context.user_data["tour_user_phone"] = update.message.text
-        await update.message.reply_text(
-            "(ОБЯЗАТЕЛЬНО) Укажите свои паспортные данные. Они необходимы для подачи списков на экскурсию: ",
-            reply_markup=ReplyKeyboardRemove(),
-        )
-        return TOUR_PASSPORT
-    else:
-        context.user_data["tour_user_phone"] = update.message.text
+    # if (
+    #     "tour_zenith" in context.user_data
+    #     and not "tour_user_phone" in context.user_data
+    # ):
+    #     context.user_data["tour_user_phone"] = update.message.text
+    #     await update.message.reply_text(
+    #         "(ОБЯЗАТЕЛЬНО) Укажите свои паспортные данные. Они необходимы для подачи списков на экскурсию: ",
+    #         reply_markup=ReplyKeyboardRemove(),
+    #     )
+    #     return TOUR_PASSPORT
+    # else:
+    # context.user_data["tour_user_phone"] = update.message.text
+    context.user_data["tour_user_phone"] = update.message.text
 
     # Check for free places at chosen tour
     tour = free_places_validation(db, context.user_data["tour_name"])
@@ -444,7 +447,7 @@ async def tour_finish(
     add_tour_participant(db, context.user_data)
 
     await update.message.reply_text(
-        "Ваша заявка принята.\n"
+        f"Ваша заявка принята.\n"
         "<b>Актуальную</b> информацию по месту и времени экскурсии Вы сможете найти в разделе «Тайминг 11.04»\n"
         "Информацию по трансферу до места встречи Вы сможете найти в разделе «Трансфер 11.04».\n"
         "Обязательно ознакомьтесь с перечнем необходимых вещей для экскурсии в разделе «чек-лист».\n"

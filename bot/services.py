@@ -8,7 +8,7 @@ def already_signed_up_for_tour(user_id: int, db) -> bool:
     tours_participants = db["tour_participants"]
     signed_up = tours_participants.find_one({"user_id": user_id})
     if signed_up:
-        return True
+        return signed_up["tour"]
     return False
 
 
