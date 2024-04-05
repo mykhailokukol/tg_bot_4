@@ -69,6 +69,13 @@ def get_residence_info(db, user_name: str, info: str) -> str:
     return result
 
 
+def get_transfer_in_info(db, user_name: str):
+    collection = db["transfers_in"]
+    result = collection.find({"full_name": {"$regex": "^" + escape(user_name)}})
+    result = list(result)
+    return result
+
+
 async def tours_to_csv(db, update):
     collection = db["tour_participants"]
     data = list(collection.find())
@@ -91,3 +98,24 @@ async def tours_to_csv(db, update):
         )
 
     remove(temp_csv_file)
+
+
+def add_user_to_db(db, user_id: int):
+    users = db["users"]
+
+    if users.find_one({"id": user_id}):
+        return
+    users.insert_one({"id": user_id})
+
+
+def get_notification(db):
+    from datetime import datetime
+
+    current_date = datetime.now()
+    current_hour = current_date.hour
+
+    collection = db["notifications"]
+    text = collection.find_one(
+        {"date": current_date.strftime("%Y-%m-%d"), "hour": current_hour}
+    )["text"]
+    return text

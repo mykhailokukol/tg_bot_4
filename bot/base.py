@@ -3,7 +3,6 @@ import logging
 from pymongo import MongoClient
 from telegram import (
     InlineKeyboardButton,
-    KeyboardButton,
     InlineKeyboardMarkup,
     ReplyKeyboardMarkup,
     ReplyKeyboardRemove,
@@ -24,12 +23,19 @@ from bot.services import (
     decrement_free_places,
     free_places_validation,
     get_all_tours,
+    get_notification,
     get_residence_info,
     tours_to_csv,
+    get_transfer_in_info,
+    add_user_to_db,
 )
 
 logging.basicConfig(
-    format="%(levelname)s | %(name)s | %(asctime)s | %(message)s", level=logging.INFO
+    format="%(levelname)s | %(name)s | %(asctime)s | %(message)s",
+    level=logging.WARN,
+    filemode="a",
+    filename="logs/warn.log",
+    encoding="utf-8",
 )
 log = logging.getLogger(__name__)
 
@@ -38,6 +44,7 @@ TOUR_CHOOSE, TOUR_DESCRIPTION, TOUR_NAME, TOUR_PHONE, TOUR_PASSPORT, TOUR_FINISH
 )
 QUESTION_ASK = 6
 RESIDENCE_1, RESIDENCE_2 = 7, 8
+TRANSFER_1, TRANSFER_2 = 9, 10
 
 
 mongo_client = MongoClient(settings.MONGODB_CLIENT_URL)
@@ -49,9 +56,10 @@ async def start(
     context: ContextTypes.DEFAULT_TYPE,
 ) -> None:
     if settings.STATEMENT == "pre-release":
+        add_user_to_db(db, update.message.from_user.id)
         try:
             with open("media/invitation.mov", "rb") as file:
-                text = "Рады приветствовать тебя в @TELE2_RLT_BOT\nСовсем скоро тут появится подробное расписание, информация о трансферах, проживании и многое другое.\nСейчас ты можешь посмотреть чек-лист, он поможет тебе ничего не забыть.\nЕсли у тебя остались вопросы, обратись к организаторам.\n\nА пока настройся на мероприятие вместе с героями Tele2!"
+                text = "Рады приветствовать тебя в @TELE2_RLT_BOT\nВ разделах ты можешь посмотреть подробное расписание, информацию о трансферах, проживании и многое другое.\nСмотри чек-лист, он поможет тебе ничего не забыть.\nЕсли у тебя остались вопросы, обратись к организаторам.\n\nА пока настройся на мероприятие вместе с героями Tele2!"
                 markup = InlineKeyboardMarkup(start_keyboard_pre_release)
                 await update.effective_chat.send_video(
                     caption=text,
@@ -70,6 +78,8 @@ async def start(
             )
         except AttributeError:
             pass
+
+        add_user_to_db(db, update.message.from_user.id)
 
         if already_signed_up_for_tour(update.effective_chat.id, db):
             markup = InlineKeyboardMarkup(start_keyboard_without_tours)
@@ -171,47 +181,86 @@ async def callback_simple(
                     "Дресс-код Coctail.\nА теперь действуй - собирай чемоданы и ничего не забудь!",
                     photo=file,
                 )
-                if settings.STATEMENT == "release":
-                    await start(update, context)
+                # if settings.STATEMENT == "release":
+                #     await start(update, context)
         case "timing_1":
             await update.effective_chat.send_message(
-                "Расписания дня приезда:\n1. ...\n2. ...\n3. ..."
+                "<b>Тайминг 09.04</b>\n\n"
+                "<b>14:00 – 22:00</b> Сбор участников. Заселение в отели\n\n"
+                "<b>19:00 – 22:00</b> Ужин в ресторане Борсалино, отель Англетер, ул. Малая Морская, д. 24",
+                parse_mode=ParseMode.HTML,
             )
-            await start(update, context)
+            # await start(update, context)
         case "transfer_1":
             await update.effective_chat.send_message(
-                "Информация по трансферу в день приезда:\nИнфо..."
+                "Введите свои фамилию и имя: ",
             )
-            await start(update, context)
+            return TRANSFER_1
         case "timing_2":
             await update.effective_chat.send_message(
-                "Расписания 2 дня:\n1. ...\n2. ...\n3. ..."
+                "<b>Тайминг 10.04</b>\n\n"
+                "<b>07:00 – 09:00</b> Завтрак в отеле проживания\n\n"
+                "<b>09:00 – 09:20</b> Отправление трансферов на конференцию. Манеж Первого кадетского корпуса, Университетская набережная, д. 13. Посадка у центрального входа отелей Астория и SO\n\n"
+                "<b>09:30 – 09:55</b> Сбор и регистрация участников. Welcome кофе\n\n"
+                "<b>09:55 – 10:00</b> Открытие конференции\n\n"
+                "<b>10:00 – 11:00</b> Антон Годовиков, генеральный директор\n\n"
+                "<b>11:00 – 11:50</b> Ирина Лебедева, заместитель генерального директора по коммерческой деятельности\n\n"
+                "<b>11:50 – 12:10</b> Кофе-брейк\n\n"
+                "<b>12:10 – 12:50</b> Ольга Свечникова, директор по маркетингу\n\n"
+                "<b>12:50 – 13:15</b> Q&A. Свои вопросы можно задать в соответствующем разделе бота\n\n"
+                "<b>13:15 – 14:15</b> Обед. Манеж Первого кадетского корпуса, 2-3 этаж\n\n"
+                "<b>14:15 – 14:45</b> Алексей Дмитриев, технический директор\n\n"
+                "<b>14:45 – 15:30</b> Елена Иванова, заместитель генерального директора по организационному развитию и управлению персоналом\n\n"
+                "<b>15:30 – 16:00</b> Кофе-брейк\n\n"
+                "<b>16:00 – 18:00</b> Пленарная сессия\n\n"
+                "<b>18:00 – 18:15</b> Заключительное слово генерального директора\n\n"
+                "<b>18:15 – 18:45</b> Отправление трансферов на ужин. STROGANOFF STEAK HOUSE, Конногвардейский бульвар, д. 4\n\n"
+                "<b>19:00 – 23:00</b> Ужин\n\n"
+                "<b>22:00 – 23:15</b> Трансфер в отели, время отправления шаттлов в разделе «Трансфер 10.04» ",
+                parse_mode=ParseMode.HTML,
             )
-            await start(update, context)
+            # await start(update, context)
         case "transfer_2":
             await update.effective_chat.send_message(
-                "Информация по трансферу в 2 день:\nИнфо..."
+                "Трансфер 10.04.\n\n"
+                "<b>09:00 - 09:20</b>\nОтправление трансферов на конференцию от центрального входа отелей Астория и SO по месту проживания.\nОтправление трансферов по заполняемости.\n\n"
+                "<b>18:15 - 18:45</b>\nОтправление трансферов от Манежа Первого кадетского корпуса на ужин.\nОтправление трансферов по заполняемости.\n\n"
+                "<b>22:00 - 23:15</b>\nОтправление трансферов от ресторана в отель.\nВремя отправления шаттлов от ресторана:<b>\n22:00\n22:30\n23:00</b>",
+                parse_mode=ParseMode.HTML,
             )
         case "timing_3":
             await update.effective_chat.send_message(
-                "Расписания 3 дня:\n1. ...\n2. ...\n3. ..."
+                "<b>Тайминг 11.04</b>\n\n"
+                "<b>07:00 – 11:00</b> Завтрак в отеле проживания\n\n"
+                "<b>10:30 – 17:00</b> Экскурсионная программа по предварительной записи. Выбери удобное время и программу в разделе «Запись на экскурсию». Сбор экскурсионных групп у центрального входа отеля Астория, время отправления в разделе «Трансфер 11.04»\n\n"
+                "<b>13:00 – 15:00</b> Обед в отеле проживания\n\n"
+                "<b>19:00 – 19:30</b> Отправление трансферов на гала-ужин. LOFT HALL, Арсенальная наб., д. 1,время отправления шаттлов в разделе «Трансфер 11.04»\n\n"
+                "<b>19:30 – 20:00</b> Сбор гостей, Welcome\n\n"
+                "<b>20:00 – 20:15</b> Торжественное открытие гала-ужина\n\n"
+                "<b>20:15 – 21:00</b> Церемония награждения\n\n"
+                "<b>21:00 – 00:30</b> Развлекательная программа\n\n"
+                "<b>00:30 – 03:30</b> Караоке\n\n"
+                "<b>22:00 – 04:00</b> Трансфер в отели, время отправления шаттлов в разделе «Трансфер 11.04»",
+                parse_mode=ParseMode.HTML,
             )
-            await start(update, context)
+            # await start(update, context)
         case "transfer_3":
-            await update.effective_chat.send_message(
-                "Информация по трансферу в 3 день:\nИнфо..."
-            )
+            await update.effective_chat.send_message("...")
             await start(update, context)
         case "timing_4":
             await update.effective_chat.send_message(
-                "Расписания дня отъезда:\n1. ...\n2. ...\n3. ..."
+                "<b>Тайминг 12.04</b>\n\n"
+                "<b>07:00 – 11:00</b> Завтрак в отеле проживания\n\n"
+                "<b>12:00</b> Выселение из отелей\n\n"
+                "<b>07:00 – 00:00</b> Трансферы в аэропорт/вокзал, время отправления шаттлов в разделе «Трансфер 12.04» <b>Если ты планируешь добираться самостоятельно, не забудь сообщить организаторам.</b>",
+                parse_mode=ParseMode.HTML,
             )
-            await start(update, context)
+            # await start(update, context)
         case "transfer_4":
             await update.effective_chat.send_message(
                 "Информация по трансферу в день отъезда:\nИнфо..."
             )
-            await start(update, context)
+            # await start(update, context)
         case "contacts":
             await update.effective_chat.send_message(
                 "Трансфер: Ольга Яршина +7 977 522 6352\n"
@@ -220,8 +269,8 @@ async def callback_simple(
                 reply_markup=ReplyKeyboardRemove(),
             )
 
-            if settings.STATEMENT == "release":
-                await start(update, context)
+            # if settings.STATEMENT == "release":
+            #     await start(update, context)
             return ConversationHandler.END
 
 
@@ -340,8 +389,6 @@ async def tour_passport(
     context.user_data["tour_user_passport"] = update.message.text
 
     context.user_data["user_id"] = update.message.from_user.id
-
-    print(context.user_data)
 
     decrement_free_places(context.user_data["tour_name"], db)
     add_tour_participant(db, context.user_data)
@@ -477,7 +524,6 @@ async def residence(
     update: Update,
     context: ContextTypes.DEFAULT_TYPE,
 ) -> int:
-    print("residence")
     try:
         user_name = update.message.text
         info = get_residence_info(db, user_name, "hotel_website")
@@ -504,3 +550,45 @@ async def download_tours_data(
 ) -> None:
     if int(update.message.from_user.id) == int(settings.MODERATOR_ID):
         await tours_to_csv(db, update)
+
+
+async def transfer_1(
+    update: Update,
+    context: ContextTypes.DEFAULT_TYPE,
+) -> int:
+    try:
+        user_name = update.message.text
+        log.warn(f"User input transfer 10.04: {user_name}")
+        info = get_transfer_in_info(db, user_name)
+        if len(info) > 0:
+            for i in info:
+                await update.message.reply_text(
+                    f'ФИО: {i["full_name"]}\n'
+                    f'Дата прибытия: {i["arrival_date"]}\n'
+                    f'Время прибытия: {i["arrival_time"]}\n'
+                    f'Номер самолета/поезда: {i["flight_train_number"]}\n'
+                    f'Трансфер: {i["transfer"]}',
+                    reply_markup=ReplyKeyboardRemove(),
+                )
+        else:
+            await update.message.reply_text(
+                'ФИО не найдены. Проверьте корректность внесения данных и повторите запрос в разделе "Трансфер" или свяжитесь с организаторами.'
+            )
+    except TypeError as e:
+        await update.message.reply_text(
+            'ФИО не найдены. Проверьте корректность внесения данных и повторите запрос в разделе "Трансфер" или свяжитесь с организаторами.'
+        )
+    return ConversationHandler.END
+
+
+async def send_notification(
+    update: Update,
+    context: ContextTypes.DEFAULT_TYPE,
+) -> None:
+    if int(update.message.from_user.id) != int(settings.MODERATOR_ID):
+        return
+
+    text = get_notification(db)
+    users = db["users"]
+    for user in users:
+        await context.bot.send_message(chat_id=user["id"], text=text)

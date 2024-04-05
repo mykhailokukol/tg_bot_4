@@ -26,6 +26,8 @@ from bot.base import (
     tour_phone,
     tour_finish,
     residence,
+    transfer_1,
+    send_notification,
 )
 from bot.base import (
     TOUR_PASSPORT,
@@ -37,6 +39,8 @@ from bot.base import (
     TOUR_FINISH,
     RESIDENCE_1,
     RESIDENCE_2,
+    TRANSFER_1,
+    TRANSFER_2,
 )
 
 logging.basicConfig(
@@ -93,6 +97,16 @@ def main() -> None:
         fallbacks=[CommandHandler("cancel", cancel)],
     )
     app.add_handler(residence_conv_handler)
+    transfer_1_conv_handler = ConversationHandler(
+        entry_points=[
+            CallbackQueryHandler(callback_simple, pattern="transfer_1"),
+        ],
+        states={
+            TRANSFER_1: [MessageHandler(filters.TEXT & ~filters.COMMAND, transfer_1)],
+        },
+        fallbacks=[CommandHandler("cancel", cancel)],
+    )
+    app.add_handler(transfer_1_conv_handler)
 
     app.add_handler(CommandHandler("start", start))
     app.add_handler(
@@ -102,6 +116,7 @@ def main() -> None:
         )
     )
     app.add_handler(CommandHandler("download", download_tours_data))
+    app.add_handler(CommandHandler("send", send_notification))
 
     app.run_polling()
 

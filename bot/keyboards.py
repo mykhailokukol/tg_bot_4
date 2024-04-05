@@ -7,7 +7,7 @@ start_keyboard = [
     ],
     [
         InlineKeyboardButton("Тайминг 09.04", callback_data="timing_1"),
-        InlineKeyboardButton("Трансфер 09.04", callback_data="transfer_1"),
+        InlineKeyboardButton("Трансфер 8-9.04", callback_data="transfer_1"),
     ],
     [
         InlineKeyboardButton("Тайминг 10.04", callback_data="timing_2"),
@@ -38,6 +38,27 @@ start_keyboard_pre_release = [
     ],
     [
         InlineKeyboardButton("Проживание", callback_data="residence"),
+    ],
+    [
+        InlineKeyboardButton("Трансфер 8-9.04", callback_data="transfer_1"),
+    ],
+    [
+        InlineKeyboardButton("Тайминг 09.04", callback_data="timing_1"),
+    ],
+    [
+        InlineKeyboardButton("Трансфер 10.04", callback_data="transfer_2"),
+    ],
+    [
+        InlineKeyboardButton("Тайминг 10.04", callback_data="timing_2"),
+    ],
+    [
+        InlineKeyboardButton("Тайминг 11.04", callback_data="timing_3"),
+    ],
+    [
+        InlineKeyboardButton("Тайминг 12.04", callback_data="timing_4"),
+    ],
+    [
+        InlineKeyboardButton("Записаться на экскурсию", callback_data="tour"),
     ],
     [
         InlineKeyboardButton("Контакты организаторов", callback_data="contacts"),
