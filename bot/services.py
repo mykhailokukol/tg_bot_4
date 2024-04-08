@@ -104,9 +104,9 @@ async def tours_to_csv(db, update):
 def add_user_to_db(db, user_id: int):
     users = db["users"]
 
-    if users.find_one({"id": user_id, "datetime": str(datetime.datetime.now())}):
+    if users.find_one({"id": user_id}):
         return
-    users.insert_one({"id": user_id})
+    users.insert_one({"id": user_id, "datetime": str(datetime.datetime.now())})
 
 
 def get_notification(db):
