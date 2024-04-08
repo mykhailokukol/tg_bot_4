@@ -593,5 +593,5 @@ async def send_notification(
 
     text = get_notification(db)
     users = db["users"]
-    for user in users:
+    for user in users.find({}):
         await context.bot.send_message(chat_id=user["id"], text=text)
