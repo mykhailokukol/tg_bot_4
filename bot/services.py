@@ -1,5 +1,6 @@
 import csv
 import codecs
+import datetime
 from re import escape
 from os import remove
 
@@ -103,7 +104,7 @@ async def tours_to_csv(db, update):
 def add_user_to_db(db, user_id: int):
     users = db["users"]
 
-    if users.find_one({"id": user_id}):
+    if users.find_one({"id": user_id, "datetime": str(datetime.datetime.now())}):
         return
     users.insert_one({"id": user_id})
 
