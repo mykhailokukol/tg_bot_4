@@ -133,7 +133,13 @@ async def callback(
                 "Ниже представлен список экскурсий, "
                 "выберите интересующую, чтобы ознакомиться с содержанием"
             )
-            markup = ReplyKeyboardMarkup([[tour["name"]] for tour in tours])
+            markup = ReplyKeyboardMarkup(
+                [
+                    [tour["name"]]
+                    for tour in tours
+                    if not tour["name"].startswith("Прогулки в Зените")
+                ]
+            )
             await update.effective_chat.send_message(
                 "Выберите экскурсию: ",
                 reply_markup=markup,
