@@ -63,6 +63,9 @@ start_keyboard_pre_release = [
     [
         InlineKeyboardButton("Контакты организаторов", callback_data="contacts"),
     ],
+    [
+        InlineKeyboardButton("Задать вопрос спикеру", callback_data="question"),
+    ],
 ]
 
 

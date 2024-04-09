@@ -18,7 +18,7 @@ from bot.base import (
     callback_simple,
     cancel,
     question_ask,
-    moderator_response,
+    # moderator_response,
     tour_choose,
     tour_description,
     tour_name,
@@ -63,7 +63,7 @@ def main() -> None:
         allow_reentry=True,
     )
     app.add_handler(question_conv_handler)
-    app.add_handler(MessageHandler(filters.REPLY, moderator_response))
+    # app.add_handler(MessageHandler(filters.REPLY, moderator_response))
     tour_conv_handler = ConversationHandler(
         entry_points=[
             CallbackQueryHandler(callback, pattern="tour"),

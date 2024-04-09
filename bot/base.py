@@ -471,42 +471,43 @@ async def question_ask(
         )
         return await start(update, context)
     await context.bot.send_message(
-        chat_id=settings.MODERATOR_ID,
-        text=f"Ответьте на вопрос: \n{question.text}\n\n> {question.from_user.id}",
+        chat_id=1080268835,  # Speaker assissnant ID
+        text=f"• Вопрос:\n<b>{question.text}</b>\n\n>От пользователя: {question.from_user.id}",
+        parse_mode=ParseMode.HTML,
     )
-    await update.message.reply_text(
-        "Ваш вопрос направлен модератору. Пожалуйста, дождитесь ответа"
-    )
+    await update.message.reply_text("Ваш вопрос спикеру принят.")
     log.info(f"Задан вопрос: {question.text} [{question.from_user.id}]")
     return ConversationHandler.END
 
 
-async def moderator_response(
-    update: Update,
-    context: ContextTypes.DEFAULT_TYPE,
-) -> None:
-    if int(update.message.from_user.id) != int(settings.MODERATOR_ID):
-        return QUESTION_ASK
+# async def moderator_response(
+#     update: Update,
+#     context: ContextTypes.DEFAULT_TYPE,
+# ) -> None:
+#     if int(update.message.from_user.id) != int(
+#         settings.MODERATOR_ID
+#     ):  # or int(update.message.from_user.id) != 123456789:
+#         return QUESTION_ASK
 
-    text = update.message.reply_to_message.text.split("> ")[0][:-2].split("\n")[1]
-    reply_text = update.message.text
-    user_id = update.message.reply_to_message.text.split("> ")[1]
+#     text = update.message.reply_to_message.text.split("> ")[0][:-2].split("\n")[1]
+#     reply_text = update.message.text
+#     user_id = update.message.reply_to_message.text.split("> ")[1]
 
-    await context.bot.send_message(
-        text="Модератор ответил на Ваш вопрос.\n",
-        chat_id=user_id,
-    )
-    await context.bot.copy_message(
-        message_id=update.message.message_id,
-        chat_id=user_id,
-        from_chat_id=update.message.chat_id,
-    )
-    await context.bot.send_message(
-        text='Если у Вас появятся новые вопросы, нажмите на кнопку "Задать вопрос"',
-        chat_id=user_id,
-    )
+#     await context.bot.send_message(
+#         text="Модератор ответил на Ваш вопрос.\n",
+#         chat_id=user_id,
+#     )
+#     await context.bot.copy_message(
+#         message_id=update.message.message_id,
+#         chat_id=user_id,
+#         from_chat_id=update.message.chat_id,
+#     )
+#     await context.bot.send_message(
+#         text='Если у Вас появятся новые вопросы, нажмите на кнопку "Задать вопрос"',
+#         chat_id=user_id,
+#     )
 
-    log.info(f"На вопрос {text} [{user_id}] получен ответ: {reply_text}")
+#     log.info(f"На вопрос {text} [{user_id}] получен ответ: {reply_text}")
 
 
 # async def residence_second_name(
