@@ -137,7 +137,7 @@ async def callback(
                 [
                     [tour["name"]]
                     for tour in tours
-                    if not tour["name"].startswith("Прогулки в Зените")
+                    # if not tour["name"].startswith("Прогулки в Зените")
                 ]
             )
             await update.effective_chat.send_message(
