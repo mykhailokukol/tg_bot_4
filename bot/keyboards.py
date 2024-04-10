@@ -55,6 +55,9 @@ start_keyboard_pre_release = [
         InlineKeyboardButton("Тайминг 11.04", callback_data="timing_3"),
     ],
     [
+        InlineKeyboardButton("Трансфер 11.04", callback_data="transfer_3"),
+    ]
+    [
         InlineKeyboardButton("Тайминг 12.04", callback_data="timing_4"),
     ],
     # [
