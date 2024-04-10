@@ -57,9 +57,9 @@ start_keyboard_pre_release = [
     [
         InlineKeyboardButton("Тайминг 12.04", callback_data="timing_4"),
     ],
-    [
-        InlineKeyboardButton("Записаться на экскурсию", callback_data="tour"),
-    ],
+    # [
+    #     InlineKeyboardButton("Записаться на экскурсию", callback_data="tour"),
+    # ],
     [
         InlineKeyboardButton("Контакты организаторов", callback_data="contacts"),
     ],
