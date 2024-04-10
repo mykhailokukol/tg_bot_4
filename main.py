@@ -28,6 +28,9 @@ from bot.base import (
     residence,
     transfer_1,
     send_notification,
+    tour_notifications_choose,
+    tour_notifications_finish,
+    tour_notifications_text,
 )
 from bot.base import (
     TOUR_PASSPORT,
@@ -41,6 +44,8 @@ from bot.base import (
     RESIDENCE_2,
     TRANSFER_1,
     TRANSFER_2,
+    NOTIFICATIONS_2,
+    NOTIFICATIONS_1,
 )
 
 logging.basicConfig(
@@ -107,6 +112,23 @@ def main() -> None:
         fallbacks=[CommandHandler("cancel", cancel)],
     )
     app.add_handler(transfer_1_conv_handler)
+    notifications_conv_handler = ConversationHandler(
+        entry_points=[
+            CommandHandler("sendtours", tour_notifications_choose),
+        ],
+        states={
+            NOTIFICATIONS_1: [
+                MessageHandler(filters.TEXT & ~filters.COMMAND, tour_notifications_text)
+            ],
+            NOTIFICATIONS_2: [
+                MessageHandler(
+                    filters.TEXT & ~filters.COMMAND, tour_notifications_finish
+                )
+            ],
+        },
+        fallbacks=[CommandHandler("cancel", cancel)],
+    )
+    app.add_handler(notifications_conv_handler)
 
     app.add_handler(CommandHandler("start", start))
     app.add_handler(

@@ -120,3 +120,9 @@ def get_notification(db):
         {"date": current_date.strftime("%Y-%m-%d"), "hour": current_hour}
     )["text"]
     return text
+
+
+def get_tour_users(db, tour_name: str):
+    collection = db["tour_participants"]
+    users = collection.find({"tour": tour_name})
+    return users

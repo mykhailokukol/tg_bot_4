@@ -25,6 +25,7 @@ from bot.services import (
     get_all_tours,
     get_notification,
     get_residence_info,
+    get_tour_users,
     tours_to_csv,
     get_transfer_in_info,
     add_user_to_db,
@@ -45,6 +46,7 @@ TOUR_CHOOSE, TOUR_DESCRIPTION, TOUR_NAME, TOUR_PHONE, TOUR_PASSPORT, TOUR_FINISH
 QUESTION_ASK = 6
 RESIDENCE_1, RESIDENCE_2 = 7, 8
 TRANSFER_1, TRANSFER_2 = 9, 10
+NOTIFICATIONS_1, NOTIFICATIONS_2 = 11, 12
 
 
 mongo_client = MongoClient(settings.MONGODB_CLIENT_URL)
@@ -621,3 +623,43 @@ async def send_notification(
     users = db["users"]
     for user in users.find({}):
         await context.bot.send_message(chat_id=user["id"], text=text)
+
+
+async def tour_notifications_choose(
+    update: Update,
+    context: ContextTypes.DEFAULT_TYPE,
+) -> int:
+    if int(update.message.from_user.id) != int(settings.MODERATOR_ID):
+        return ConversationHandler.END
+
+    tours = get_all_tours(db)
+    markup = ReplyKeyboardMarkup([[tour["name"]] for tour in tours])
+    await update.message.reply_text(
+        "Выберите пользователям каких экскурсий отправить уведомление: ",
+        reply_markup=markup,
+    )
+    return NOTIFICATIONS_1
+
+
+async def tour_notifications_text(
+    update: Update,
+    context: ContextTypes.DEFAULT_TYPE,
+) -> int:
+    context.user_data["notification_tour_name"] = update.message.text
+    await update.message.reply_text(
+        f"Введите текст уведомления для пользователей, которые пойдут на экскурсию {update.message.text}: "
+    )
+    return NOTIFICATIONS_2
+
+
+async def tour_notifications_finish(
+    update: Update,
+    context: ContextTypes.DEFAULT_TYPE,
+) -> int:
+    for user in get_tour_users(db, context.user_data["notification_tour_name"]):
+        await context.bot.send_message(
+            chat_id=user["user_id"], text=update.message.text
+        )
+
+    await update.message.reply_text("Рассылка уведомлений проведена.")
+    return ConversationHandler.END
