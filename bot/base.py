@@ -269,6 +269,7 @@ async def callback_simple(
                 "13:30 Прогулки в Зените (стадион «Газпром Арена»)\n"
                 "13:40 Доходные дома, дворы и парадные + парадная Ромашка\n"
                 "14:00 Музей Фаберже\n"
+                "14:40 Прогулка по Михайловскому театру\n"
                 "15:15 Юсуповский дворец (парадные залы и экспозиция, посвященная Г. Распутину)\n\n"
                 "<b>19:00 – 19:15 Отправление трансферов на гала-ужин. LOFT HALL, Арсенальная наб., д. 1.\nПосадка у центрального входа отелей Англетер и SO</b>\n\n"
                 "<b>22:00 – 03:30 LOFT HALL, Арсенальная наб., д. 1. – Отели Астория/Англетер/SO</b>\n"
@@ -632,7 +633,7 @@ async def tour_notifications_choose(
     if int(update.message.from_user.id) != int(settings.MODERATOR_ID):
         return ConversationHandler.END
 
-    tours = get_all_tours(db)
+    tours = get_all_tours(db, only_free=False)
     markup = ReplyKeyboardMarkup([[tour["name"]] for tour in tours])
     await update.message.reply_text(
         "Выберите пользователям каких экскурсий отправить уведомление: ",

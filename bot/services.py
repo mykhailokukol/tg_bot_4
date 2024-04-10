@@ -57,9 +57,12 @@ def add_tour_participant(db, user_data: dict) -> None:
         )
 
 
-def get_all_tours(db):
+def get_all_tours(db, only_free: bool = True):
     tours = db["tours"]
-    tours = tours.find({"free_places": {"$gt": 0}})
+    if only_free:
+        tours = tours.find({"free_places": {"$gt": 0}})
+    else:
+        tours = tours.find({})
     return list(tours)
 
 
