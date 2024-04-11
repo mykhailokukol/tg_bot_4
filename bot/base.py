@@ -631,9 +631,9 @@ async def transfer_2(
                 await update.message.reply_text(
                     f'ФИО: {i["full_name"]}\n'
                     f'Дата отъезда: {i["arrival_date"]}\n'
-                    f'Время выезда из отеля: {i["arrival_time"]}\n'
+                    f'Время отбытия самолета/поезда: {i["arrival_time"]}\n'
                     f'Номер самолета/поезда: {i["flight_train_number"]}\n'
-                    f'Трансфер: {i["transfer"]}',
+                    f'Время выезда из отеля: {i["transfer"]}',
                     reply_markup=ReplyKeyboardRemove(),
                 )
         else:
