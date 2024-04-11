@@ -80,6 +80,13 @@ def get_transfer_in_info(db, user_name: str):
     return result
 
 
+def get_transfer_out_info(db, user_name: str):
+    collection = db["transfers_out"]
+    result = collection.find({"full_name": {"$regex": "^" + escape(user_name)}})
+    result = list(result)
+    return result
+
+
 async def tours_to_csv(db, update):
     collection = db["tour_participants"]
     data = list(collection.find())

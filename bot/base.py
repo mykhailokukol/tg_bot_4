@@ -26,6 +26,7 @@ from bot.services import (
     get_notification,
     get_residence_info,
     get_tour_users,
+    get_transfer_out_info,
     tours_to_csv,
     get_transfer_in_info,
     add_user_to_db,
@@ -287,9 +288,13 @@ async def callback_simple(
             )
             # await start(update, context)
         case "transfer_4":
+            # await update.effective_chat.send_message(
+            #     "Информация по трансферу в день отъезда:"
+            # )
             await update.effective_chat.send_message(
-                "Информация по трансферу в день отъезда:\nИнфо..."
+                "Введите свои фамилию и имя: ",
             )
+            return TRANSFER_2
             # await start(update, context)
         case "contacts":
             await update.effective_chat.send_message(
@@ -592,6 +597,35 @@ async def transfer_1(
         user_name = update.message.text
         log.warn(f"User input transfer 10.04: {user_name}")
         info = get_transfer_in_info(db, user_name)
+        if len(info) > 0:
+            for i in info:
+                await update.message.reply_text(
+                    f'ФИО: {i["full_name"]}\n'
+                    f'Дата прибытия: {i["arrival_date"]}\n'
+                    f'Время прибытия: {i["arrival_time"]}\n'
+                    f'Номер самолета/поезда: {i["flight_train_number"]}\n'
+                    f'Трансфер: {i["transfer"]}',
+                    reply_markup=ReplyKeyboardRemove(),
+                )
+        else:
+            await update.message.reply_text(
+                'ФИО не найдены. Проверьте корректность внесения данных и повторите запрос в разделе "Трансфер" или свяжитесь с организаторами.'
+            )
+    except TypeError as e:
+        await update.message.reply_text(
+            'ФИО не найдены. Проверьте корректность внесения данных и повторите запрос в разделе "Трансфер" или свяжитесь с организаторами.'
+        )
+    return ConversationHandler.END
+
+
+async def transfer_2(
+    update: Update,
+    context: ContextTypes.DEFAULT_TYPE,
+) -> int:
+    try:
+        user_name = update.message.text
+        log.warn(f"User input transfer 12.04: {user_name}")
+        info = get_transfer_out_info(db, user_name)
         if len(info) > 0:
             for i in info:
                 await update.message.reply_text(

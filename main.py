@@ -27,6 +27,7 @@ from bot.base import (
     tour_finish,
     residence,
     transfer_1,
+    transfer_2,
     send_notification,
     tour_notifications_choose,
     tour_notifications_finish,
@@ -112,6 +113,16 @@ def main() -> None:
         fallbacks=[CommandHandler("cancel", cancel)],
     )
     app.add_handler(transfer_1_conv_handler)
+    transfer_2_conv_handler = ConversationHandler(
+        entry_points=[
+            CallbackQueryHandler(callback_simple, pattern="transfer_4"),
+        ],
+        states={
+            TRANSFER_2: [MessageHandler(filters.TEXT & ~filters.COMMAND, transfer_2)],
+        },
+        fallbacks=[CommandHandler("cancel", cancel)],
+    )
+    app.add_handler(transfer_2_conv_handler)
     notifications_conv_handler = ConversationHandler(
         entry_points=[
             CommandHandler("sendtours", tour_notifications_choose),
